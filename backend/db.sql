@@ -10,7 +10,9 @@ CREATE DATABASE mjst_invoicing;
 -- ============================
 CREATE TABLE Users(
     UserID SERIAL PRIMARY KEY,
+    UserFullName VARCHAR(255),
     UserName VARCHAR(255),
+    UserDepartment VARCHAR(255),
     UserEmail VARCHAR(255),
     UserPassword VARCHAR(255),
     CreatedDate TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -127,7 +129,7 @@ CREATE TABLE Orders (
 -- INVOICES TABLE
 -- ============================
 CREATE TABLE Invoices (
-    InvoiceID VARCHAR(255) PRIMARY KEY,
+    InvoiceID SERIAL PRIMARY KEY,
     InvoiceDate TIMESTAMP,
     InvoiceNo VARCHAR(255),
     ClientID VARCHAR(255),
@@ -155,9 +157,15 @@ SELECT * FROM Invoices;
 
 SELECT * FROM Clients;
 
+DELETE FROM Clients
+WHERE ClientID < 'CLI042';
+
+DROP TABLE invoices;
 
 ALTER TABLE Clients DROP COLUMN ClientAddress2;
 ALTER TABLE Clients ALTER COLUMN ClientProvince TYPE VARCHAR(20);
 ALTER TABLE Clients RENAME COLUMN ClientStreetAddress TO ClientAddress;
 ALTER TABLE CLients RENAME COLUMN ClientAddress4 TO ClientZipCode;
 ALTER TABLE Clients ADD COLUMN ClientZipCode VARCHAR(255);
+ALTER TABLE Users ADD COLUMN UserFullName VARCHAR(255);
+ALTER TABLE Users ADD COLUMN UserDepartment VARCHAR(255);

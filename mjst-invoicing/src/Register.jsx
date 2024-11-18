@@ -2,7 +2,9 @@ import React, { useState } from "react";
 import axios from "axios";
 
 const Register = () => {
+  const [fullname, setFullname] = useState("");
   const [username, setUsername] = useState("");
+  const [department, setDepartment] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [message, setMessage] = useState("");
@@ -11,7 +13,9 @@ const Register = () => {
     event.preventDefault();
     try {
       const response = await axios.post("http://localhost:5000/register", {
+        fullname,
         username,
+        department,
         email,
         password
       });
@@ -29,6 +33,21 @@ const Register = () => {
         <form onSubmit={handleSubmit} className="space-y-6">
           <div>
             <label
+              htmlFor="fullname"
+              className="block text-sm font-medium text-gray-700"
+            >
+              Full Name
+            </label>
+            <input
+              type="text"
+              id="fullname"
+              value={fullname}
+              onChange={e => setFullname(e.target.value)}
+              className="w-full px-3 py-2 mt-1 border rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+            />
+          </div>
+          <div>
+            <label
               htmlFor="username"
               className="block text-sm font-medium text-gray-700"
             >
@@ -39,6 +58,21 @@ const Register = () => {
               id="username"
               value={username}
               onChange={e => setUsername(e.target.value)}
+              className="w-full px-3 py-2 mt-1 border rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+            />
+          </div>
+          <div>
+            <label
+              htmlFor="department"
+              className="block text-sm font-medium text-gray-700"
+            >
+              Department
+            </label>
+            <input
+              type="text"
+              id="department"
+              value={department}
+              onChange={e => setDepartment(e.target.value)}
               className="w-full px-3 py-2 mt-1 border rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
             />
           </div>

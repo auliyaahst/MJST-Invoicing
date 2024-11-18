@@ -3,6 +3,7 @@ import React, { useState } from "react";
 const Sidebar = () => {
   const [isInvoiceDropdownOpen, setIsInvoiceDropdownOpen] = useState(false);
 	const [isClientDropdownOpen, setIsClientDropdownOpen] = useState(false);
+  const [isOrderDropdownOpen, setIsOrderDropdownOpen] = useState(false);
 
   const toggleInvoiceDropdown = () => {
     setIsInvoiceDropdownOpen(!isInvoiceDropdownOpen);
@@ -11,6 +12,10 @@ const Sidebar = () => {
 	const toggleClientDropdown = () => {
 		setIsClientDropdownOpen(!isClientDropdownOpen);
 	}
+  
+  const toggleOrderDropdown = () => {
+    setIsOrderDropdownOpen(!isOrderDropdownOpen);
+  }
 
 
   return (
@@ -134,9 +139,55 @@ const Sidebar = () => {
           )}
         </div>
 
+        {/* Order Dropdown */}
+        <div>
+          <button
+            onClick={toggleOrderDropdown}
+            className="w-full flex items-center justify-between font-medium text-gray-900 hover:bg-gray-200 rounded-lg px-4 py-2"
+          >
+            <span>Order</span>
+            <svg
+              className={`w-5 h-5 transform transition-transform ${
+                isOrderDropdownOpen ? "rotate-180" : ""
+              }`}
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              strokeWidth="2"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M19 9l-7 7-7-7"
+              />
+            </svg>
+          </button>
+
+          {/* Dropdown Menu */}
+          {isOrderDropdownOpen && (
+            <div className="ml-4 mt-2 space-y-2">
+              <a
+                href="/input-order"
+                className="block font-medium text-gray-900 hover:bg-gray-200 rounded-lg px-4 py-2"
+              >
+                Input Order
+              </a>
+              <a
+                href="/order-list"
+                className="block font-medium text-gray-900 hover:bg-gray-200 rounded-lg px-4 py-2"
+              >
+                Order List
+              </a>
+            </div>
+          )}
+        </div>
+
+
+
         {/* Settings */}
         <a
-          href="#"
+          href="/settings"
           className="flex items-center font-medium text-gray-900 hover:bg-gray-200 rounded-lg px-4 py-2"
         >
           Settings

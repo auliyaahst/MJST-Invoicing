@@ -3,6 +3,8 @@ import Logo from "./assets/final-logo-mjstjpeg-png.png";
 
 function Navbar() {
   const [username, setUsername] = useState("");
+  const [fullname, setFullname] = useState("");
+  const [department, setDepartment] = useState("");
 
   useEffect(() => {
     // Function to update the username from local storage
@@ -11,20 +13,27 @@ function Navbar() {
       if (storedUsername) {
         setUsername(storedUsername);
       }
+      const storedFullname = localStorage.getItem("fullname");
+      if (storedFullname) {
+        setFullname(storedFullname);
+      }
+      const storedDepartment = localStorage.getItem("department");
+      if (storedDepartment) {
+        setDepartment(storedDepartment);
+      }
     };
-  
+
     // Call the function initially to set the username
     updateUsername();
-  
+
     // Add an event listener to listen for storage changes
     window.addEventListener("storage", updateUsername);
-  
+
     // Clean up the event listener on component unmount
     return () => {
       window.removeEventListener("storage", updateUsername);
     };
   }, []);
-  
 
   return (
     <div className="navbar">
@@ -34,11 +43,7 @@ function Navbar() {
           <div className="w-full border-b-2 border-gray-200">
             <div className="bg-white h-16 justify-between items-center mx-auto px-4 flex">
               <div>
-                <img
-                  src={Logo}
-                  className="block btn- h-8 w-auto"
-                  alt=""
-                />
+                <img src={Logo} className="block btn- h-8 w-auto" alt="" />
               </div>
               <div className="lg:block mr-auto ml-40 hidden relative max-w-xs">
                 <p className="pl-3 items-center flex absolute inset-y-0 left-0 pointer-events-none">
@@ -136,7 +141,9 @@ function Navbar() {
                     />
                   </svg>
                   <p className="font-semibold text-sm">
-                    {username ? username : "Profile username"}
+                    {fullname
+                      ? `${fullname} (${department})`
+                      : "Profile username"}
                   </p>
                 </div>
               </div>

@@ -10,4 +10,8 @@ const pool = new Pool({
   port: process.env.PG_PORT,
 });
 
+pool.connect()
+  .then(() => console.log("Connected to the database"))
+  .catch(err => console.error("Database connection error:", err));
+
 module.exports = pool;

@@ -1,5 +1,5 @@
 const express = require("express");
-const cors = require("cors");
+const cors = require('cors');
 const pool = require("./db");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
@@ -25,15 +25,15 @@ const authenticateToken = (req, res, next) => {
 
 // Route to create a new user
 app.post("/register", async (req, res) => {
-  const { username, email, password } = req.body;
+  const { fullname, username, department, email, password } = req.body;
 
   try {
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
 
     await pool.query(
-      "INSERT INTO users (UserName, UserEmail, UserPassword) VALUES ($1, $2, $3)",
-      [username, email, hashedPassword]
+      "INSERT INTO users (UserFullName, UserName, UserDepartment, UserEmail, UserPassword) VALUES ($1, $2, $3, $4, $5)",
+      [fullname, username, department, email, hashedPassword]
     );
 
     res.status(201).send("User created");
@@ -130,6 +130,90 @@ app.get("/clients", authenticateToken, async (req, res) => {
   }
 });
 
+// Route to fetch company master data
+app.get("/company-master", authenticateToken, async (req, res) => {
+  try {
+    const company = await pool.query("SELECT * FROM CompanyMaster LIMIT 1");
+    res.json(company.rows[0]);
+  } catch (err) {
+    console.error("Error fetching company data:", err.message);
+    res.status(500).send("Server error");
+  }
+});
+
+// Route to create company master data
+app.post("/company-master", authenticateToken, async (req, res) => {
+  const {
+    companyName,
+    companyAddress,
+    companyProvince,
+    companyZipCode,
+    companyPhone,
+    companyPIC,
+    companyPICTitle,
+    invoiceNotes
+  } = req.body;
+
+  console.log("Received data for creating company:", req.body);
+
+  try {
+    await pool.query(
+      "INSERT INTO CompanyMaster (CompanyName, CompanyAddress, CompanyProvince, CompanyZipCode, CompanyPhone, CompanyPIC, CompanyPICTitle, InvoiceNotes) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)",
+      [
+        companyName,
+        companyAddress,
+        companyProvince,
+        companyZipCode,
+        companyPhone,
+        companyPIC,
+        companyPICTitle,
+        invoiceNotes
+      ]
+    );
+
+    res.status(201).send("Company data created");
+  } catch (err) {
+    console.error("Error creating company data:", err.message);
+    res.status(500).send("Server error");
+  }
+});
+
+// Route to update company master data
+app.put("/company-master", authenticateToken, async (req, res) => {
+  const {
+    companyName,
+    companyAddress,
+    companyProvince,
+    companyZipCode,
+    companyPhone,
+    companyPIC,
+    companyPICTitle,
+    invoiceNotes
+  } = req.body;
+
+  console.log("Received data for updating company:", req.body);
+
+  try {
+    await pool.query(
+      "UPDATE CompanyMaster SET CompanyName = $1, CompanyAddress = $2, CompanyProvince = $3, CompanyZipCode = $4, CompanyPhone = $5, CompanyPIC = $6, CompanyPICTitle = $7, InvoiceNotes = $8 WHERE CompanyID = 'CMP001'",
+      [
+        companyName,
+        companyAddress,
+        companyProvince,
+        companyZipCode,
+        companyPhone,
+        companyPIC,
+        companyPICTitle,
+        invoiceNotes
+      ]
+    );
+
+    res.status(200).send("Company data updated");
+  } catch (err) {
+    console.error("Error updating company data:", err.message);
+    res.status(500).send("Server error");
+  }
+});
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {

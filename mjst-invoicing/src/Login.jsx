@@ -2,12 +2,11 @@ import React, { useState, useContext } from "react";
 import axios from "axios";
 import AuthContext from "./AuthContext";
 
-
 const Login = () => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
-	const { login } = useContext(AuthContext);
+  const { login } = useContext(AuthContext);
 
   const handleSubmit = async event => {
     event.preventDefault();
@@ -17,9 +16,9 @@ const Login = () => {
         password
       });
       console.log("Token:", response.data.token);
-			console.log("Username:", response.data.username);
+      console.log("Username:", response.data.username);
       localStorage.setItem("token", response.data.token); // Save the token in local storage
-			localStorage.setItem("username", response.data.username);
+      localStorage.setItem("username", response.data.username);
       window.location.href = "/dashboard"; // Redirect to the dashboard
     } catch (error) {
       setError("Invalid username or password");
@@ -71,11 +70,11 @@ const Login = () => {
           >
             Login
           </button>
-          <p class="text-sm font-light text-gray-500 dark:text-gray-400">
+          <p className="text-sm font-light text-gray-500 dark:text-gray-400">
             Don’t have an account yet?{" "}
             <a
               href="/register"
-              class="font-medium text-primary-600 hover:underline dark:text-primary-500"
+              className="font-medium text-primary-600 hover:underline dark:text-primary-500"
             >
               Sign up
             </a>

@@ -9,6 +9,7 @@ import Sidebar from "./Sidebar";
 import AuthContext from "./AuthContext";
 import InputClient from "./InputClient";
 import ClientList from "./ClientList";
+import Settings from "./Settings";
 import "./index.css";
 
 const App = () => {
@@ -29,6 +30,7 @@ const App = () => {
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/input-client" element={<InputClient />} />
             <Route path="/client-list" element={<ClientList />} />
+            <Route path="/settings" element={<Settings />} />
           </Routes>
         </div>
       </div>
