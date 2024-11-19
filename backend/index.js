@@ -215,6 +215,45 @@ app.put("/company-master", authenticateToken, async (req, res) => {
   }
 });
 
+// Route to create a new order
+app.post("/orders", authenticateToken, async (req, res) => {
+  const {
+    orderID,
+    clientID,
+    orderDate,
+    orderTotal,
+    companyID
+  } = req.body;
+
+  const createdUser = req.user.username;
+  const modifiedUser = req.user.username; 
+  
+  console.log("Received Order Data:", req.body); // Debugging line
+
+  try {
+    await pool.query(
+      "INSERT INTO orders (OrderID, OrderDate, OrderTotal, ClientID, CompanyID, CreatedUser, ModifiedUser) VALUES ($1, $2, $3, $4, $5, $6, $7)",
+      [orderID, orderDate, orderTotal, clientID, companyID, createdUser, modifiedUser]
+    );
+
+    res.status(201).send("Order created");
+  } catch (err) {
+    console.error("Error creating order:", err.message);
+    res.status(500).send("Server error");
+  }
+});
+
+// Route to fetch client names
+app.get("/client-names", authenticateToken, async (req, res) => {
+  try {
+    const clients = await pool.query("SELECT ClientID, ClientName FROM clients");
+    res.json(clients.rows);
+  } catch (err) {
+    console.error("Error fetching client names:", err.message);
+    res.status(500).send("Server error");
+  }
+});
+
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
