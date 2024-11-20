@@ -2,10 +2,13 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import AuthContext from "./AuthContext";
 
 const InputInvoice = () => {
   const [invoiceNo, setInvoiceNo] = useState("");
-  const [invoiceDate, setInvoiceDate] = useState(new Date().toISOString().split("T")[0]);
+  const [invoiceDate, setInvoiceDate] = useState(
+    new Date().toISOString().split("T")[0]
+  );
   const [clients, setClients] = useState([]);
   const [selectedClientID, setSelectedClientID] = useState("");
   const [contractNumber, setContractNumber] = useState("");
@@ -16,21 +19,35 @@ const InputInvoice = () => {
   const [salesTaxAmount, setSalesTaxAmount] = useState(0);
   const [subTotal, setSubTotal] = useState(0);
   const [invoiceTotal, setInvoiceTotal] = useState(0);
+  const { username } = useContext(AuthContext);
 
   // Bulan dalam format Romawi
-  const romanMonths = ["I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X", "XI", "XII"];
+  const romanMonths = [
+    "I",
+    "II",
+    "III",
+    "IV",
+    "V",
+    "VI",
+    "VII",
+    "VIII",
+    "IX",
+    "X",
+    "XI",
+    "XII"
+  ];
 
   const calculateTotals = () => {
     const lineTotal = billingQty * billingPrice;
-    const vatAmount = vat ? lineTotal * 0.02 : 0; // 2% VAT if applicable
-    const salesTaxAmount = lineTotal * 0.11; // 11% Sales Tax
-    const total = lineTotal + vatAmount + salesTaxAmount;
+    const vatAmount = vat ? lineTotal * 0.02 : 0;
+    const salesTax = lineTotal * 0.11; // 11% Sales Tax
+    const total = lineTotal + vatAmount + salesTax;
     setSubTotal(lineTotal);
     setInvoiceTotal(total);
-    setSalesTaxAmount(salesTaxAmount);
+    setSalesTaxAmount(salesTax); // Update this state
   };
 
-  const generateInvoiceNo = async (selectedDate) => {
+  const generateInvoiceNo = async selectedDate => {
     const currentDate = new Date(selectedDate);
     const day = currentDate.getDate();
     const year = currentDate.getFullYear();
@@ -38,24 +55,23 @@ const InputInvoice = () => {
     const romanMonth = romanMonths[monthIndex];
 
     try {
-      // Fetch the count of invoices for the selected date from the backend
-      const response = await axios.get(`http://localhost:5000/invoices/count?date=${selectedDate}`);
+      const response = await axios.get(
+        `http://localhost:5000/invoices/count?date=${selectedDate}`
+      );
       const invoiceCount = response.data.count || 0;
 
-      // Generate the invoice number
-      const newInvoiceNo = `${String(invoiceCount + 1).padStart(2, "0")}-${day}/INV/MJST/${romanMonth}/${year}`;
-      console.log("Generated Invoice Number:", newInvoiceNo);
+      const newInvoiceNo = `${String(invoiceCount + 1).padStart(
+        2,
+        "0"
+      )}-${day}/INV/MJST/${romanMonth}/${year}`;
       return newInvoiceNo;
     } catch (error) {
-      console.error("Error fetching daily invoice count:", error);
-      // If there's an error, default the invoice number to "01"
-      const newInvoiceNo = `01-${day}/INV/MJST/${romanMonth}/${year}`;
-      console.log("Default Invoice Number:", newInvoiceNo);
-      return newInvoiceNo;
+      console.error("Error generating invoice number:", error);
+      return `01-${day}/INV/MJST/${romanMonth}/${year}`;
     }
   };
 
-  const handleInvoiceDateChange = async (e) => {
+  const handleInvoiceDateChange = async e => {
     const newDate = e.target.value;
     setInvoiceDate(newDate);
 
@@ -64,12 +80,27 @@ const InputInvoice = () => {
     setInvoiceNo(newInvoiceNo);
   };
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async e => {
     e.preventDefault();
+
+    // Validate numeric fields
+    if (
+      billingQty <= 0 ||
+      billingPrice < 0 ||
+      subTotal < 0 ||
+      invoiceTotal < 0
+    ) {
+      toast.error(
+        "Invalid input values. Please check the quantities and prices."
+      );
+      return;
+    }
+
     const invoiceData = {
       invoiceNo,
       invoiceDate,
       clientID: selectedClientID,
+      companyID: "CMP001", 
       contractNumber,
       billingDescription,
       billingQty,
@@ -77,16 +108,18 @@ const InputInvoice = () => {
       lineTotal: subTotal,
       subTotal,
       vat: vat ? subTotal * 0.02 : 0, // 2% VAT if applicable
-      salesTax: subTotal * 0.11, // 11% Sales Tax
+      salesTax: salesTaxAmount, // Use the salesTaxAmount state variable
       invoiceTotal,
+      createdUser: username,
+      modifiedUser: username,
     };
 
     try {
       const token = localStorage.getItem("token");
       await axios.post("http://localhost:5000/invoices", invoiceData, {
         headers: {
-          Authorization: `Bearer ${token}`,
-        },
+          Authorization: `Bearer ${token}`
+        }
       });
       toast.success("Invoice created successfully!");
       setTimeout(() => {
@@ -123,9 +156,12 @@ const InputInvoice = () => {
     })();
   }, []);
 
-  useEffect(() => {
-    calculateTotals();
-  }, [billingQty, billingPrice, vat]);
+  useEffect(
+    () => {
+      calculateTotals();
+    },
+    [billingQty, billingPrice, vat]
+  );
 
   return (
     <div className="p-6 bg-gray-100 rounded-lg shadow-md">
@@ -153,15 +189,15 @@ const InputInvoice = () => {
           <label className="block text-gray-700">Client Name:</label>
           <select
             value={selectedClientID}
-            onChange={(e) => setSelectedClientID(e.target.value)}
+            onChange={e => setSelectedClientID(e.target.value)}
             className="w-full p-2 border rounded"
           >
             <option value="">Select a client</option>
-            {clients.map((client) => (
+            {clients.map(client =>
               <option key={client.clientid} value={client.clientid}>
                 {client.clientname}
               </option>
-            ))}
+            )}
           </select>
         </div>
         <div className="mb-4">
@@ -169,7 +205,7 @@ const InputInvoice = () => {
           <input
             type="text"
             value={contractNumber}
-            onChange={(e) => setContractNumber(e.target.value)}
+            onChange={e => setContractNumber(e.target.value)}
             className="w-full p-2 border rounded"
           />
         </div>
@@ -177,7 +213,7 @@ const InputInvoice = () => {
           <label className="block text-gray-700">Billing Description:</label>
           <textarea
             value={billingDescription}
-            onChange={(e) => setBillingDescription(e.target.value)}
+            onChange={e => setBillingDescription(e.target.value)}
             className="w-full p-2 border rounded"
           />
         </div>
@@ -187,7 +223,7 @@ const InputInvoice = () => {
             <input
               type="number"
               value={billingQty}
-              onChange={(e) => setBillingQty(Number(e.target.value))}
+              onChange={e => setBillingQty(Number(e.target.value))}
               className="w-full p-2 border rounded"
             />
           </div>
@@ -196,7 +232,7 @@ const InputInvoice = () => {
             <input
               type="number"
               value={billingPrice}
-              onChange={(e) => setBillingPrice(Number(e.target.value))}
+              onChange={e => setBillingPrice(Number(e.target.value))}
               className="w-full p-2 border rounded"
             />
           </div>
@@ -205,7 +241,7 @@ const InputInvoice = () => {
           <label className="block text-gray-700">Add VAT:</label>
           <select
             value={vat}
-            onChange={(e) => setVat(e.target.value === "true")}
+            onChange={e => setVat(e.target.value === "true")}
             className="w-full p-2 border rounded"
           >
             <option value="false">No</option>
@@ -213,13 +249,13 @@ const InputInvoice = () => {
           </select>
         </div>
         <div className="mb-4">
-            <label className="block text-gray-700">Sales Tax:</label>
-            <input
-                type="number"
-                value={salesTaxAmount}
-                disabled
-                className="w-full p-2 border rounded"
-            />
+          <label className="block text-gray-700">Sales Tax:</label>
+          <input
+            type="number"
+            value={salesTaxAmount}
+            disabled
+            className="w-full p-2 border rounded"
+          />
         </div>
 
         <div className="mb-4">
@@ -247,7 +283,11 @@ const InputInvoice = () => {
           Submit
         </button>
       </form>
-      <ToastContainer position="top-right" autoClose={3000} hideProgressBar={false} />
+      <ToastContainer
+        position="top-right"
+        autoClose={3000}
+        hideProgressBar={false}
+      />
     </div>
   );
 };

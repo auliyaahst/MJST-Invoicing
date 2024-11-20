@@ -275,8 +275,10 @@ app.get("/orderlist", authenticateToken, async (req, res) => {
 
 app.post("/invoices", authenticateToken, async (req, res) => {
   const {
+    invoiceNo,
     invoiceDate,
     clientID,
+    companyID, // Ensure this is destructured
     contractNumber,
     billingDescription,
     billingQty,
@@ -284,16 +286,21 @@ app.post("/invoices", authenticateToken, async (req, res) => {
     lineTotal,
     subTotal,
     vat,
-    salestax,
+    salesTax,
     invoiceTotal,
   } = req.body;
 
+  const createdUser = req.user.username;
+  const modifiedUser = req.user.username;
+
   try {
     await pool.query(
-      "INSERT INTO Invoices (InvoiceDate, ClientID, ContractNumber, BillingDescription, BillingQty, BillingPrice, LineTotal, SubTotal, VAT, SalesTax, InvoiceTotal) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)",
+      "INSERT INTO Invoices (InvoiceNo, InvoiceDate, ClientID, CompanyID, ContractNumber, BillingDescription, BillingQty, BillingPrice, LineTotal, SubTotal, VAT, SalesTax, InvoiceTotal, CreatedUser, ModifiedUser) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)",
       [
+        invoiceNo,
         invoiceDate,
         clientID,
+        companyID, // Ensure it's passed here
         contractNumber,
         billingDescription,
         billingQty,
@@ -301,8 +308,10 @@ app.post("/invoices", authenticateToken, async (req, res) => {
         lineTotal,
         subTotal,
         vat,
-        salestax,
+        salesTax,
         invoiceTotal,
+        createdUser,
+        modifiedUser
       ]
     );
     res.status(201).send("Invoice created");
@@ -315,12 +324,17 @@ app.post("/invoices", authenticateToken, async (req, res) => {
 app.get("/invoices/count", async (req, res) => {
   const { date } = req.query;
   try {
-    const count = await db.query("SELECT COUNT(*) FROM Invoices WHERE invoiceDate = $1", [date]);
-    res.json({ count: count.rows[0].count });
+    const count = await pool.query(
+      "SELECT COUNT(*) FROM Invoices WHERE DATE(invoiceDate) = $1",
+      [date]
+    );
+    res.json({ count: parseInt(count.rows[0].count, 10) }); // Ensure numeric conversion
   } catch (error) {
+    console.error("Error fetching invoice count:", error.message);
     res.status(500).json({ error: "Failed to fetch invoice count" });
   }
 });
+
 
 
 const PORT = process.env.PORT || 5000;
