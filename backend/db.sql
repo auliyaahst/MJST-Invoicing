@@ -128,10 +128,33 @@ CREATE TABLE Orders (
 -- ============================
 -- INVOICES TABLE
 -- ============================
-CREATE TABLE Invoices (
+-- Step 1: Create a sequence for unique numbers
+CREATE SEQUENCE invoice_seq START 1;
+
+-- Step 2: Create a function to generate the invoice number
+CREATE OR REPLACE FUNCTION generate_invoice_number()
+RETURNS TRIGGER AS $$
+DECLARE
+    new_invoice_no VARCHAR;
+BEGIN
+    -- Generate the invoice number in the format '02-22/INV/MJST/XI/2024'
+    new_invoice_no := 
+        LPAD(nextval('invoice_seq')::TEXT, 2, '0') || '-' || 
+        TO_CHAR(CURRENT_DATE, 'YY') || 
+        '/INV/MJST/' || 
+        TO_CHAR(CURRENT_DATE, 'Mon/YYYY');
+    
+    RAISE NOTICE 'Generated Invoice Number: %', new_invoice_no;
+    NEW.InvoiceNo := new_invoice_no;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+-- Step 3: Create the Invoices table if it doesn't already exist
+CREATE TABLE IF NOT EXISTS Invoices (
     InvoiceID SERIAL PRIMARY KEY,
-    InvoiceDate TIMESTAMP,
     InvoiceNo VARCHAR(255),
+    InvoiceDate TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     ClientID VARCHAR(255),
     CompanyID VARCHAR(255),
     ContractNumber VARCHAR(255),
@@ -151,14 +174,35 @@ CREATE TABLE Invoices (
     FOREIGN KEY (CompanyID) REFERENCES CompanyMaster(CompanyID)
 );
 
+-- Step 4: Create a trigger to set the InvoiceNo before insert
+CREATE TRIGGER invoice_no_trigger
+BEFORE INSERT ON Invoices
+FOR EACH ROW
+WHEN (NEW.InvoiceNo IS NULL)
+EXECUTE FUNCTION generate_invoice_number();
+
+-- Update VAT and SalesTax columns in the Invoices table
+ALTER TABLE Invoices
+ADD COLUMN SalesTax DECIMAL(10, 2) DEFAULT 0;
+
+ALTER TABLE Invoices
+ALTER COLUMN VAT SET DEFAULT 0;
+
+
 SELECT * FROM users;
 
 SELECT * FROM Invoices;
 
+SELECT * FROM orders;
+
 SELECT * FROM Clients;
 
-DELETE FROM Clients
-WHERE ClientID < 'CLI042';
+SELECT * FROM CompanyMaster;
+
+DELETE FROM CompanyMaster
+WHERE CompanyID = 'CMP002';
+
+SELECT * FROM users WHERE UserName = 'testdev';
 
 DROP TABLE invoices;
 
@@ -169,3 +213,15 @@ ALTER TABLE CLients RENAME COLUMN ClientAddress4 TO ClientZipCode;
 ALTER TABLE Clients ADD COLUMN ClientZipCode VARCHAR(255);
 ALTER TABLE Users ADD COLUMN UserFullName VARCHAR(255);
 ALTER TABLE Users ADD COLUMN UserDepartment VARCHAR(255);
+
+SELECT o.OrderID, o.OrderDate, o.OrderTotal, o.CreatedUser, o.ModifiedUser, c.ClientName
+FROM orders o
+JOIN clients c ON o.ClientID = c.ClientID;
+
+INSERT INTO Users(UserFullName, UserName, UserDepartment, UserEmail, UserPassword)
+VALUES('Test User', 'testuser', 'IT', 'testuser@dev.com', 'test123');
+
+INSERT INTO Invoices (ClientID, CompanyID, BillingDescription, BillingQty, BillingPrice, SubTotal, VAT, SalesTax, InvoiceTotal, CreatedUser)
+VALUES 
+('CLI041', 'CMP001', 'Product A', 10, 100.00, 1000.00, 100.00, 50.00, 1150.00, 'testdev');
+

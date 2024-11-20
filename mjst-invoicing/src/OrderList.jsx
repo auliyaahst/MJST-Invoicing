@@ -28,6 +28,10 @@ const OrderList = () => {
     fetchOrders();
   }, []);
 
+  const formatCurrency = (amount) => {
+    return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR' }).format(amount);
+  };
+
   return (
     <div className="max-w-6xl mx-auto p-8 bg-white shadow-md rounded-md">
       <h1 className="text-3xl font-bold text-center mb-6">Order List</h1>
@@ -61,7 +65,7 @@ const OrderList = () => {
                     {new Date(order.orderdate).toLocaleDateString()}
                   </td>
                   <td className="py-2 px-4 border-b">
-                    {order.ordertotal}
+                  {formatCurrency(order.ordertotal)}
                   </td>
                   <td className="py-2 px-4 border-b">
                     {order.createduser}

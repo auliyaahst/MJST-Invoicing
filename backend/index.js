@@ -273,6 +273,56 @@ app.get("/orderlist", authenticateToken, async (req, res) => {
   }
 });
 
+app.post("/invoices", authenticateToken, async (req, res) => {
+  const {
+    invoiceDate,
+    clientID,
+    contractNumber,
+    billingDescription,
+    billingQty,
+    billingPrice,
+    lineTotal,
+    subTotal,
+    vat,
+    salestax,
+    invoiceTotal,
+  } = req.body;
+
+  try {
+    await pool.query(
+      "INSERT INTO Invoices (InvoiceDate, ClientID, ContractNumber, BillingDescription, BillingQty, BillingPrice, LineTotal, SubTotal, VAT, SalesTax, InvoiceTotal) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)",
+      [
+        invoiceDate,
+        clientID,
+        contractNumber,
+        billingDescription,
+        billingQty,
+        billingPrice,
+        lineTotal,
+        subTotal,
+        vat,
+        salestax,
+        invoiceTotal,
+      ]
+    );
+    res.status(201).send("Invoice created");
+  } catch (err) {
+    console.error("Error creating invoice:", err.message);
+    res.status(500).send("Server error");
+  }
+});
+
+app.get("/invoices/count", async (req, res) => {
+  const { date } = req.query;
+  try {
+    const count = await db.query("SELECT COUNT(*) FROM Invoices WHERE invoiceDate = $1", [date]);
+    res.json({ count: count.rows[0].count });
+  } catch (error) {
+    res.status(500).json({ error: "Failed to fetch invoice count" });
+  }
+});
+
+
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);

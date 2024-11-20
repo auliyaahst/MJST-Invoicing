@@ -80,7 +80,7 @@ const Sidebar = () => {
           {isInvoiceDropdownOpen && (
             <div className="ml-4 mt-2 space-y-2">
               <a
-                href="/create-invoice"
+                href="/input-invoice"
                 className="block font-medium text-gray-900 hover:bg-gray-200 rounded-lg px-4 py-2"
               >
                 Create Invoice
