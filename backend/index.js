@@ -1,5 +1,5 @@
 const express = require("express");
-const cors = require('cors');
+const cors = require("cors");
 const pool = require("./db");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
@@ -217,23 +217,25 @@ app.put("/company-master", authenticateToken, async (req, res) => {
 
 // Route to create a new order
 app.post("/orders", authenticateToken, async (req, res) => {
-  const {
-    orderID,
-    clientID,
-    orderDate,
-    orderTotal,
-    companyID
-  } = req.body;
+  const { orderID, clientID, orderDate, orderTotal, companyID } = req.body;
 
   const createdUser = req.user.username;
-  const modifiedUser = req.user.username; 
-  
+  const modifiedUser = req.user.username;
+
   console.log("Received Order Data:", req.body); // Debugging line
 
   try {
     await pool.query(
       "INSERT INTO orders (OrderID, OrderDate, OrderTotal, ClientID, CompanyID, CreatedUser, ModifiedUser) VALUES ($1, $2, $3, $4, $5, $6, $7)",
-      [orderID, orderDate, orderTotal, clientID, companyID, createdUser, modifiedUser]
+      [
+        orderID,
+        orderDate,
+        orderTotal,
+        clientID,
+        companyID,
+        createdUser,
+        modifiedUser
+      ]
     );
 
     res.status(201).send("Order created");
@@ -246,10 +248,27 @@ app.post("/orders", authenticateToken, async (req, res) => {
 // Route to fetch client names
 app.get("/client-names", authenticateToken, async (req, res) => {
   try {
-    const clients = await pool.query("SELECT ClientID, ClientName FROM clients");
+    const clients = await pool.query(
+      "SELECT ClientID, ClientName FROM clients"
+    );
     res.json(clients.rows);
   } catch (err) {
     console.error("Error fetching client names:", err.message);
+    res.status(500).send("Server error");
+  }
+});
+
+// Route to fetch all orders
+app.get("/orderlist", authenticateToken, async (req, res) => {
+  try {
+    const orderlist = await pool.query(`
+      SELECT o.OrderID, o.OrderDate, o.OrderTotal, o.CreatedUser, o.ModifiedUser, c.ClientName
+      FROM orders o
+      JOIN clients c ON o.ClientID = c.ClientID
+    `);
+    res.json(orderlist.rows);
+  } catch (err) {
+    console.error("Error fetching order list:", err.message);
     res.status(500).send("Server error");
   }
 });
