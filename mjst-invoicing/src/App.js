@@ -8,6 +8,7 @@ import Navbar from "./Navbar";
 import Sidebar from "./Sidebar";
 import AuthContext from "./AuthContext";
 import InputInvoice from "./InputInvoice";
+import InvoiceList from "./InvoiceList";
 import InputClient from "./InputClient";
 import ClientList from "./ClientList";
 import InputOrder from "./InputOrder";
@@ -32,6 +33,7 @@ const App = () => {
             <Route path="/register" element={<Register />} />
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/input-invoice" element={<InputInvoice />} />
+            <Route path="/invoice-list" element={<InvoiceList />} />
             <Route path="/input-client" element={<InputClient />} />
             <Route path="/client-list" element={<ClientList />} />
             <Route path="/input-order" element={<InputOrder />} />

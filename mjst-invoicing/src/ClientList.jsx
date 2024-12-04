@@ -30,31 +30,34 @@ const ClientList = () => {
   );
 
   return (
-    <div className="flex items-center justify-center h-screen bg-gray-50">
-      <div className="w-full p-8 bg-white rounded-lg shadow-lg h-full">
+    <div className="flex h-screen rounded-lg bg-gray-50 shadow-md">
+      <div className="w-full p-8 bg-white rounded-lg shadow-lg">
         <h1 className="text-3xl font-bold text-center mb-8 text-gray-700">
           Client List
         </h1>
-        <div className="overflow-x-auto">
+        <div className="overflow-x-auto rounded-lg shadow-md">
           <table className="min-w-full bg-white border border-gray-200 rounded-lg">
-            <thead className="bg-gray-100 border-b border-gray-200">
+            <thead className="bg-gray-100 border-b border-gray-200 rounded-lg">
               <tr>
-                <th className="px-4 py-3 text-left text-sm font-semibold text-gray-600">
+                <th className="px-4 py-3 text-left text-sm font-semibold text-gray-600 border border-gray-200">
+                  Client ID
+                </th>
+                <th className="px-4 py-3 text-left text-sm font-semibold text-gray-600 border border-gray-200">
                   Client Name
                 </th>
-                <th className="px-4 py-3 text-left text-sm font-semibold text-gray-600">
+                <th className="px-4 py-3 text-left text-sm font-semibold text-gray-600 border border-gray-200">
                   Address
                 </th>
-                <th className="px-4 py-3 text-left text-sm font-semibold text-gray-600">
+                <th className="px-4 py-3 text-left text-sm font-semibold text-gray-600 border border-gray-200">
                   Phone
                 </th>
-                <th className="px-4 py-3 text-left text-sm font-semibold text-gray-600">
+                <th className="px-4 py-3 text-left text-sm font-semibold text-gray-600 border border-gray-200">
                   PIC
                 </th>
-                <th className="px-4 py-3 text-left text-sm font-semibold text-gray-600">
+                <th className="px-4 py-3 text-left text-sm font-semibold text-gray-600 border border-gray-200">
                   PIC Title
                 </th>
-                <th className="px-4 py-3 text-left text-sm font-semibold text-gray-600">
+                <th className="px-4 py-3 text-left text-sm font-semibold text-gray-600 border border-gray-200">
                   Business Sector
                 </th>
               </tr>
@@ -64,46 +67,33 @@ const ClientList = () => {
                 ? clients.map(client =>
                     <tr
                       key={client.clientid}
-                      className="border-b border-gray-200 hover:bg-gray-50 transition duration-150"
+                      className="hover:bg-gray-50 transition duration-150"
                     >
-                      <td className="px-4 py-3 text-gray-700">
+                      <td className="px-4 py-3 text-gray-700 border border-gray-200">
+                        {client.clientid}
+                      </td>
+                      <td className="px-4 py-3 text-gray-700 border border-gray-200">
                         {client.clientname}
                       </td>
-                      <td className="px-4 py-3 text-gray-700">
-                        {client.clientaddress &&
-                          <React.Fragment>
-                            <span className="block">
-                              {client.clientaddress.split(",")[0]}
-                            </span>
-                            <span className="block">
-                              {client.clientaddress.split(",")[1]}
-                            </span>
-                            <span className="block">
-                              {`${client.clientaddress.split(
-                                ","
-                              )[2]}, ${client.clientprovince}`}
-                            </span>
-                            <span className="block">
-                              {client.clientzipcode}
-                            </span>
-                          </React.Fragment>}
+                      <td className="px-4 py-3 text-gray-700 border border-gray-200">
+                        {client.clientaddress}
                       </td>
-                      <td className="px-4 py-3 text-gray-700">
+                      <td className="px-4 py-3 text-gray-700 border border-gray-200">
                         {client.clientphone}
                       </td>
-                      <td className="px-4 py-3 text-gray-700">
+                      <td className="px-4 py-3 text-gray-700 border border-gray-200">
                         {client.clientpic}
                       </td>
-                      <td className="px-4 py-3 text-gray-700">
+                      <td className="px-4 py-3 text-gray-700 border border-gray-200">
                         {client.clientpictitle}
                       </td>
-                      <td className="px-4 py-3 text-gray-700">
+                      <td className="px-4 py-3 text-gray-700 border border-gray-200">
                         {client.businesssector}
                       </td>
                     </tr>
                   )
                 : <tr>
-                    <td colSpan="6" className="text-center py-6 text-gray-500">
+                    <td colSpan="6" className="text-center py-6 text-gray-500 border border-gray-200">
                       No clients found
                     </td>
                   </tr>}

@@ -72,6 +72,8 @@ app.post("/login", async (req, res) => {
     );
 
     res.json({ token, username: user.rows[0].username });
+    console.log("User logged in:", user.rows[0].username); // Debugging line
+    console.log("Token generated:", token); // Debugging line
   } catch (err) {
     console.error("Error during login:", err.message);
     res.status(500).send("Server error");
@@ -135,6 +137,7 @@ app.get("/company-master", authenticateToken, async (req, res) => {
   try {
     const company = await pool.query("SELECT * FROM CompanyMaster LIMIT 1");
     res.json(company.rows[0]);
+    console.log("Company data fetched:", company.rows[0]); // Debugging line
   } catch (err) {
     console.error("Error fetching company data:", err.message);
     res.status(500).send("Server error");
@@ -144,30 +147,30 @@ app.get("/company-master", authenticateToken, async (req, res) => {
 // Route to create company master data
 app.post("/company-master", authenticateToken, async (req, res) => {
   const {
-    companyName,
-    companyAddress,
-    companyProvince,
-    companyZipCode,
-    companyPhone,
-    companyPIC,
-    companyPICTitle,
-    invoiceNotes
+    companyname,
+    companyaddress,
+    companydirector,
+    companydirtitle,
+    companyphone,
+    companypic,
+    companypictitle,
+    invoicenotes
   } = req.body;
 
   console.log("Received data for creating company:", req.body);
 
   try {
     await pool.query(
-      "INSERT INTO CompanyMaster (CompanyName, CompanyAddress, CompanyProvince, CompanyZipCode, CompanyPhone, CompanyPIC, CompanyPICTitle, InvoiceNotes) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)",
+      "INSERT INTO CompanyMaster (CompanyName, CompanyAddress, CompanyDirector, CompanyDirTitle, CompanyPhone, CompanyPIC, CompanyPICTitle, InvoiceNotes) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)",
       [
-        companyName,
-        companyAddress,
-        companyProvince,
-        companyZipCode,
-        companyPhone,
-        companyPIC,
-        companyPICTitle,
-        invoiceNotes
+        companyname,
+        companyaddress,
+        companydirector,
+        companydirtitle,
+        companyphone,
+        companypic,
+        companypictitle,
+        invoicenotes
       ]
     );
 
@@ -181,30 +184,30 @@ app.post("/company-master", authenticateToken, async (req, res) => {
 // Route to update company master data
 app.put("/company-master", authenticateToken, async (req, res) => {
   const {
-    companyName,
-    companyAddress,
-    companyProvince,
-    companyZipCode,
-    companyPhone,
-    companyPIC,
-    companyPICTitle,
-    invoiceNotes
+    companyname,
+    companyaddress,
+    companydirector,
+    companydirtitle,
+    companyphone,
+    companypic,
+    companypictitle,
+    invoicenotes
   } = req.body;
 
   console.log("Received data for updating company:", req.body);
 
   try {
     await pool.query(
-      "UPDATE CompanyMaster SET CompanyName = $1, CompanyAddress = $2, CompanyProvince = $3, CompanyZipCode = $4, CompanyPhone = $5, CompanyPIC = $6, CompanyPICTitle = $7, InvoiceNotes = $8 WHERE CompanyID = 'CMP001'",
+      "UPDATE CompanyMaster SET CompanyName = $1, CompanyAddress = $2, CompanyDirector = $3, CompanyDirTitle = $4, CompanyPhone = $5, CompanyPIC = $6, CompanyPICTitle = $7, InvoiceNotes = $8 WHERE CompanyID = 'CMP001'",
       [
-        companyName,
-        companyAddress,
-        companyProvince,
-        companyZipCode,
-        companyPhone,
-        companyPIC,
-        companyPICTitle,
-        invoiceNotes
+        companyname,
+        companyaddress,
+        companydirector,
+        companydirtitle,
+        companyphone,
+        companypic,
+        companypictitle,
+        invoicenotes
       ]
     );
 
@@ -287,7 +290,7 @@ app.post("/invoices", authenticateToken, async (req, res) => {
     subTotal,
     vat,
     salesTax,
-    invoiceTotal,
+    invoiceTotal
   } = req.body;
 
   const createdUser = req.user.username;
@@ -295,7 +298,7 @@ app.post("/invoices", authenticateToken, async (req, res) => {
 
   try {
     await pool.query(
-      "INSERT INTO Invoices (InvoiceNo, InvoiceDate, ClientID, CompanyID, ContractNumber, BillingDescription, BillingQty, BillingPrice, LineTotal, SubTotal, VAT, SalesTax, InvoiceTotal, CreatedUser, ModifiedUser) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)",
+      "INSERT INTO Invoices (InvoiceNo, InvoiceDate, ClientID, CompanyID, ContractNumber, BillingDescription, BillingQty, BillingPrice, LineTotal, SubTotal, VAT, SalesTax, InvoiceTotal, CreatedUser, ModifiedUser) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15)",
       [
         invoiceNo,
         invoiceDate,
@@ -335,7 +338,54 @@ app.get("/invoices/count", async (req, res) => {
   }
 });
 
+app.get("/invoices", authenticateToken, async (req, res) => {
+  try {
+    console.log("Fetching invoices..."); // Debugging line
+    const invoices = await pool.query(`
+      SELECT 
+        i.InvoiceID, i.InvoiceNo, i.InvoiceDate, 
+        c.ClientName, i.InvoiceTotal 
+      FROM Invoices i
+      JOIN Clients c ON i.ClientID = c.ClientID
+    `);
+    console.log("Invoices fetched:", invoices.rows); // Debugging line
+    res.json(invoices.rows);
+  } catch (err) {
+    console.error("Error fetching invoices:", err.message);
+    res.status(500).send("Server error");
+  }
+});
 
+app.get("/invoices/:id", authenticateToken, async (req, res) => {
+  try {
+    const { id } = req.params;
+    console.log(`Fetching details for invoice ID: ${id}`); // Debugging line
+
+    const invoice = await pool.query(
+      `
+      SELECT 
+        i.InvoiceNo, i.InvoiceDate, i.InvoiceTotal, 
+        i.BillingDescription, i.BillingQty, i.BillingPrice,  i.LineTotal, i.SubTotal, i.VAT, i.SalesTax,
+        c.ClientName, c.ClientAddress, c.ClientPhone, c.ClientPIC, c.ClientPICTitle, cm.CompanyName, cm.CompanyAddress, cm.CompanyDirector, cm.CompanyDirTitle, cm.CompanyPhone, cm.CompanyPIC, cm.CompanyPICTitle, cm.InvoiceNotes
+      FROM Invoices i
+      JOIN Clients c ON i.ClientID = c.ClientID
+      JOIN CompanyMaster cm ON i.CompanyID = cm.CompanyID
+      WHERE i.InvoiceID = $1
+    `,
+      [id]
+    );
+
+    if (invoice.rows.length === 0) {
+      return res.status(404).json({ error: "Invoice not found" });
+    }
+
+    console.log("Invoice details fetched:", invoice.rows[0]); // Debugging line
+    res.json(invoice.rows[0]);
+  } catch (err) {
+    console.error("Error fetching invoice details:", err.message);
+    res.status(500).send("Server error");
+  }
+});
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {

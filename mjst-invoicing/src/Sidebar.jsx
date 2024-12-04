@@ -86,7 +86,7 @@ const Sidebar = () => {
                 Create Invoice
               </a>
               <a
-                href="/invoices"
+                href="/invoice-list"
                 className="block font-medium text-gray-900 hover:bg-gray-200 rounded-lg px-4 py-2"
               >
                 Invoice List

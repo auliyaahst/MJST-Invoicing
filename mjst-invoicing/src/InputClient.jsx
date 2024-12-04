@@ -54,16 +54,16 @@ const InputClient = () => {
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gray-100">
-      <div className="w-full max-w-4xl p-8 space-y-6 bg-white rounded shadow-md">
-        <h1 className="text-2xl font-bold text-center">Create Client</h1>
+    <div className="flex items-center justify-center h-screen bg-gray-50">
+      <div className="w-full max-w-2xl p-8 bg-white rounded-lg shadow-lg">
+        <h1 className="text-3xl font-bold text-center mb-8 text-gray-700">Create Client</h1>
         {notification && (
           <div className="p-4 mb-4 text-center text-white bg-green-500 rounded">
             {notification}
           </div>
         )}
-        <form onSubmit={handleSubmit} className="grid grid-cols-1 gap-6 md:grid-cols-2">
-          <div>
+        <form onSubmit={handleSubmit} className="space-y-6">
+          <div className="grid grid-cols-1 gap-6">
             <label className="block text-sm font-medium text-gray-700">Client Name:</label>
             <input
               type="text"
@@ -76,32 +76,10 @@ const InputClient = () => {
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700">Client Address:</label>
-            <input
+            <textarea
               type="text"
               name="clientAddress"
               value={clientData.clientAddress}
-              onChange={handleChange}
-              required
-              className="w-full px-3 py-2 mt-1 border rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700">Client Province:</label>
-            <input
-              type="text"
-              name="clientProvince"
-              value={clientData.clientProvince}
-              onChange={handleChange}
-              required
-              className="w-full px-3 py-2 mt-1 border rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700">Client Zip Code:</label>
-            <input
-              type="text"
-              name="clientZipCode"
-              value={clientData.clientZipCode}
               onChange={handleChange}
               required
               className="w-full px-3 py-2 mt-1 border rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"

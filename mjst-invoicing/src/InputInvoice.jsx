@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import axios from "axios";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -21,7 +21,6 @@ const InputInvoice = () => {
   const [invoiceTotal, setInvoiceTotal] = useState(0);
   const { username } = useContext(AuthContext);
 
-  // Bulan dalam format Romawi
   const romanMonths = [
     "I",
     "II",
@@ -100,7 +99,7 @@ const InputInvoice = () => {
       invoiceNo,
       invoiceDate,
       clientID: selectedClientID,
-      companyID: "CMP001", 
+      companyID: "CMP001",
       contractNumber,
       billingDescription,
       billingQty,
@@ -111,7 +110,7 @@ const InputInvoice = () => {
       salesTax: salesTaxAmount, // Use the salesTaxAmount state variable
       invoiceTotal,
       createdUser: username,
-      modifiedUser: username,
+      modifiedUser: username
     };
 
     try {
@@ -164,125 +163,169 @@ const InputInvoice = () => {
   );
 
   return (
-    <div className="p-6 bg-gray-100 rounded-lg shadow-md">
-      <h2 className="text-2xl font-bold mb-4">Create Invoice</h2>
-      <form onSubmit={handleSubmit}>
-        <div className="mb-4">
-          <label className="block text-gray-700">Invoice No:</label>
-          <input
-            type="text"
-            value={invoiceNo}
-            disabled
-            className="w-full p-2 border rounded"
-          />
+    <div className="flex flex-col w-full h-screen">
+      <div className="flex-grow flex w-full items-center justify-center bg-gray-50">
+        <div className="w-full p-8 bg-white rounded-lg shadow-lg">
+          <h2 className="text-3xl font-bold text-center mb-8 text-gray-700">
+            Create Invoice
+          </h2>
+          <form onSubmit={handleSubmit} className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div>
+                <label className="block text-sm font-medium text-gray-700">
+                  Invoice No
+                </label>
+                <input
+                  type="text"
+                  value={invoiceNo}
+                  disabled
+                  className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700">
+                  Invoice Date
+                </label>
+                <input
+                  type="date"
+                  value={invoiceDate}
+                  onChange={handleInvoiceDateChange}
+                  className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700">
+                  Contract Number
+                </label>
+                <input
+                  type="text"
+                  value={contractNumber}
+                  onChange={e => setContractNumber(e.target.value)}
+                  className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                />
+              </div>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700">
+                Client Name
+              </label>
+              <select
+                value={selectedClientID}
+                onChange={e => setSelectedClientID(e.target.value)}
+                className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+              >
+                <option value="">Select a client</option>
+                {clients.map(client =>
+                  <option key={client.clientid} value={client.clientid}>
+                    {client.clientname}
+                  </option>
+                )}
+              </select>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+              <div>
+                <label className="block text-sm font-medium text-gray-700">
+                  Billing Description
+                </label>
+                <textarea
+                  value={billingDescription}
+                  onChange={e => setBillingDescription(e.target.value)}
+                  className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700">
+                  Quantity
+                </label>
+                <input
+                  type="number"
+                  value={billingQty}
+                  onChange={e => setBillingQty(Number(e.target.value))}
+                  className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700">
+                  Price
+                </label>
+                <input
+                  type="number"
+                  value={billingPrice}
+                  onChange={e => setBillingPrice(Number(e.target.value))}
+                  className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700">
+                  Subtotal
+                </label>
+                <input
+                  type="number"
+                  value={subTotal}
+                  disabled
+                  className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                />
+              </div>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div>
+                <label className="block text-sm font-medium text-gray-700">
+                  Sales Tax
+                </label>
+                <input
+                  type="number"
+                  value={salesTaxAmount}
+                  disabled
+                  className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700">
+                  Add VAT
+                </label>
+                <select
+                  value={vat}
+                  onChange={e => setVat(e.target.value === "true")}
+                  className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                >
+                  <option value="false">No</option>
+                  <option value="true">Yes</option>
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700">
+                  VAT
+                </label>
+                <input
+                  type="number"
+                  value={vat ? subTotal * 0.02 : 0}
+                  disabled
+                  className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                />
+              </div>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700">
+                Total
+              </label>
+              <input
+                type="number"
+                value={invoiceTotal}
+                disabled
+                className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+              />
+            </div>
+            <div className="text-center">
+              <button
+                type="submit"
+                className="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+              >
+                Submit
+              </button>
+            </div>
+          </form>
         </div>
-        <div className="mb-4">
-          <label className="block text-gray-700">Invoice Date:</label>
-          <input
-            type="date"
-            value={invoiceDate}
-            onChange={handleInvoiceDateChange}
-            className="w-full p-2 border rounded"
-          />
-        </div>
-        <div className="mb-4">
-          <label className="block text-gray-700">Client Name:</label>
-          <select
-            value={selectedClientID}
-            onChange={e => setSelectedClientID(e.target.value)}
-            className="w-full p-2 border rounded"
-          >
-            <option value="">Select a client</option>
-            {clients.map(client =>
-              <option key={client.clientid} value={client.clientid}>
-                {client.clientname}
-              </option>
-            )}
-          </select>
-        </div>
-        <div className="mb-4">
-          <label className="block text-gray-700">Contract Number:</label>
-          <input
-            type="text"
-            value={contractNumber}
-            onChange={e => setContractNumber(e.target.value)}
-            className="w-full p-2 border rounded"
-          />
-        </div>
-        <div className="mb-4">
-          <label className="block text-gray-700">Billing Description:</label>
-          <textarea
-            value={billingDescription}
-            onChange={e => setBillingDescription(e.target.value)}
-            className="w-full p-2 border rounded"
-          />
-        </div>
-        <div className="mb-4 grid grid-cols-2 gap-4">
-          <div>
-            <label className="block text-gray-700">Quantity:</label>
-            <input
-              type="number"
-              value={billingQty}
-              onChange={e => setBillingQty(Number(e.target.value))}
-              className="w-full p-2 border rounded"
-            />
-          </div>
-          <div>
-            <label className="block text-gray-700">Price:</label>
-            <input
-              type="number"
-              value={billingPrice}
-              onChange={e => setBillingPrice(Number(e.target.value))}
-              className="w-full p-2 border rounded"
-            />
-          </div>
-        </div>
-        <div className="mb-4">
-          <label className="block text-gray-700">Add VAT:</label>
-          <select
-            value={vat}
-            onChange={e => setVat(e.target.value === "true")}
-            className="w-full p-2 border rounded"
-          >
-            <option value="false">No</option>
-            <option value="true">Yes</option>
-          </select>
-        </div>
-        <div className="mb-4">
-          <label className="block text-gray-700">Sales Tax:</label>
-          <input
-            type="number"
-            value={salesTaxAmount}
-            disabled
-            className="w-full p-2 border rounded"
-          />
-        </div>
-
-        <div className="mb-4">
-          <label className="block text-gray-700">Subtotal:</label>
-          <input
-            type="number"
-            value={subTotal}
-            disabled
-            className="w-full p-2 border rounded"
-          />
-        </div>
-        <div className="mb-4">
-          <label className="block text-gray-700">Total:</label>
-          <input
-            type="number"
-            value={invoiceTotal}
-            disabled
-            className="w-full p-2 border rounded"
-          />
-        </div>
-        <button
-          type="submit"
-          className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
-        >
-          Submit
-        </button>
-      </form>
+      </div>
       <ToastContainer
         position="top-right"
         autoClose={3000}

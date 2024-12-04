@@ -1,31 +1,38 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const Settings = () => {
   const [companyData, setCompanyData] = useState({
-    companyName: "",
-    companyAddress: "",
-    companyProvince: "",
-    companyZipCode: "",
-    companyPhone: "",
-    companyPIC: "",
-    companyPICTitle: "",
-    invoiceNotes: ""
+    companyname: "",
+    companyaddress: "",
+    companydirector: "",
+    companydirtitle: "",
+    companyphone: "",
+    companypic: "",
+    companypictitle: "",
+    invoicenotes: ""
   });
   const [isEditing, setIsEditing] = useState(false);
-  const [message, setMessage] = useState("");
+  const [isNew, setIsNew] = useState(false);
 
   useEffect(() => {
     const fetchCompanyData = async () => {
       try {
         const token = localStorage.getItem("token");
-        const response = await axios.get("http://localhost:5000/company-master", {
-          headers: {
-            Authorization: `Bearer ${token}`
+        const response = await axios.get(
+          "http://localhost:5000/company-master",
+          {
+            headers: {
+              Authorization: `Bearer ${token}`
+            }
           }
-        });
+        );
         if (response.data) {
           setCompanyData(response.data);
+        } else {
+          setIsNew(true);
           setIsEditing(true);
         }
       } catch (error) {
@@ -36,186 +43,209 @@ const Settings = () => {
     fetchCompanyData();
   }, []);
 
-  const handleChange = (e) => {
+  const handleChange = e => {
     const { name, value } = e.target;
-    setCompanyData((prevData) => ({
-      ...prevData,
-      [name]: value
-    }));
+    setCompanyData({ ...companyData, [name]: value });
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+  const handleSave = async () => {
     try {
       const token = localStorage.getItem("token");
-      console.log("Submitting company data:", companyData);
-      if (isEditing) {
-        await axios.put("http://localhost:5000/company-master", companyData, {
-          headers: {
-            Authorization: `Bearer ${token}`
-          }
-        });
-        setMessage("Company data updated successfully!");
-      } else {
+      console.log("Saving company data:", companyData); // Debugging line
+      if (isNew) {
         await axios.post("http://localhost:5000/company-master", companyData, {
           headers: {
             Authorization: `Bearer ${token}`
           }
         });
-        setMessage("Company data created successfully!");
-        setIsEditing(true);
+        toast.success("Company data created successfully!");
+      } else {
+        await axios.put("http://localhost:5000/company-master", companyData, {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        });
+        toast.success("Company data updated successfully!");
       }
+      setIsEditing(false);
+      setIsNew(false);
     } catch (error) {
       console.error("Error saving company data:", error);
-      setMessage("Error saving company data");
+      toast.error("Failed to save company data.");
     }
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gray-100">
-      <div className="w-full max-w-md p-8 space-y-6 bg-white rounded shadow-md">
-        <h1 className="text-2xl font-bold text-center">Company Master</h1>
-        {/* Company Master Container With Data and Editable */}
-        <div className="space-y-2">
-          <div>
-            <span className="font-medium">Company Name:</span> {companyData.companyName}
+    <div className="flex items-center justify-center h-screen bg-gray-50">
+      <div className="w-full max-w-4xl p-8 bg-white rounded-lg shadow-lg">
+        <h2 className="text-3xl font-bold text-center mb-8 text-gray-700">
+          Company Settings
+        </h2>
+        <div className="space-y-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <label className="block text-sm font-medium text-gray-700">
+                Company Name
+              </label>
+              {isEditing ? (
+                <input
+                  type="text"
+                  name="companyname"
+                  value={companyData.companyname}
+                  onChange={handleChange}
+                  className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                />
+              ) : (
+                <p className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm bg-gray-100 sm:text-sm">
+                  {companyData.companyname}
+                </p>
+              )}
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700">
+                Company Address
+              </label>
+              {isEditing ? (
+                <textarea
+                  name="companyaddress"
+                  value={companyData.companyaddress}
+                  onChange={handleChange}
+                  className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                />
+              ) : (
+                <p className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm bg-gray-100 sm:text-sm">
+                  {companyData.companyaddress}
+                </p>
+              )}
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700">
+                Director
+              </label>
+              {isEditing ? (
+                <input
+                  type="text"
+                  name="companydirector"
+                  value={companyData.companydirector}
+                  onChange={handleChange}
+                  className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                />
+              ) : (
+                <p className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm bg-gray-100 sm:text-sm">
+                  {companyData.companydirector}
+                </p>
+              )}
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700">
+                Title
+              </label>
+              {isEditing ? (
+                <input
+                  type="text"
+                  name="companydirtitle"
+                  value={companyData.companydirtitle}
+                  onChange={handleChange}
+                  className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                />
+              ) : (
+                <p className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm bg-gray-100 sm:text-sm">
+                  {companyData.companydirtitle}
+                </p>
+              )}
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700">
+                Company Phone
+              </label>
+              {isEditing ? (
+                <input
+                  type="text"
+                  name="companyphone"
+                  value={companyData.companyphone}
+                  onChange={handleChange}
+                  className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                />
+              ) : (
+                <p className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm bg-gray-100 sm:text-sm">
+                  {companyData.companyphone}
+                </p>
+              )}
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700">
+                Company PIC
+              </label>
+              {isEditing ? (
+                <input
+                  type="text"
+                  name="companypic"
+                  value={companyData.companypic}
+                  onChange={handleChange}
+                  className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                />
+              ) : (
+                <p className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm bg-gray-100 sm:text-sm">
+                  {companyData.companypic}
+                </p>
+              )}
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700">
+                Company PIC Title
+              </label>
+              {isEditing ? (
+                <input
+                  type="text"
+                  name="companypictitle"
+                  value={companyData.companypictitle}
+                  onChange={handleChange}
+                  className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                />
+              ) : (
+                <p className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm bg-gray-100 sm:text-sm">
+                  {companyData.companypictitle}
+                </p>
+              )}
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700">
+                Invoice Notes
+              </label>
+              {isEditing ? (
+                <textarea
+                  name="invoicenotes"
+                  value={companyData.invoicenotes}
+                  onChange={handleChange}
+                  className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                />
+              ) : (
+                <p className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm bg-gray-100 sm:text-sm">
+                  {companyData.invoicenotes}
+                </p>
+              )}
+            </div>
           </div>
-          <div>
-            <span className="font-medium">Company Address:</span> {companyData.companyAddress}
-          </div>
-          <div>
-            <span className="font-medium">Company Province:</span> {companyData.companyProvince}
-          </div>
-          <div>
-            <span className="font-medium">Company Zip Code:</span> {companyData.companyZipCode}
-          </div>
-          <div>
-            <span className="font-medium">Company Phone:</span> {companyData.companyPhone}
-          </div>
-          <div>
-            <span className="font-medium">Company PIC:</span> {companyData.companyPIC}
-          </div>
-          <div>
-            <span className="font-medium">Company PIC Title:</span> {companyData.companyPICTitle}
-          </div>
-          <div>
-            <span className="font-medium">Invoice Notes:</span> {companyData.invoiceNotes}
+          <div className="text-center">
+            {isEditing ? (
+              <button
+                onClick={handleSave}
+                className="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+              >
+                Save
+              </button>
+            ) : (
+              <button
+                onClick={() => setIsEditing(true)}
+                className="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+              >
+                Edit
+              </button>
+            )}
           </div>
         </div>
-
-        <form onSubmit={handleSubmit} className="space-y-6">
-          <div>
-            <label htmlFor="companyName" className="block text-sm font-medium text-gray-700">
-              Company Name
-            </label>
-            <input
-              type="text"
-              id="companyName"
-              name="companyName"
-              value={companyData.companyName}
-              onChange={handleChange}
-              className="w-full px-3 py-2 mt-1 border rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-            />
-          </div>
-          <div>
-            <label htmlFor="companyAddress" className="block text-sm font-medium text-gray-700">
-              Company Address
-            </label>
-            <input
-              type="text"
-              id="companyAddress"
-              name="companyAddress"
-              value={companyData.companyAddress}
-              onChange={handleChange}
-              className="w-full px-3 py-2 mt-1 border rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-            />
-          </div>
-          <div>
-            <label htmlFor="companyProvince" className="block text-sm font-medium text-gray-700">
-              Company Province
-            </label>
-            <input
-              type="text"
-              id="companyProvince"
-              name="companyProvince"
-              value={companyData.companyProvince}
-              onChange={handleChange}
-              className="w-full px-3 py-2 mt-1 border rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-            />
-          </div>
-          <div>
-            <label htmlFor="companyZipCode" className="block text-sm font-medium text-gray-700">
-              Company Zip Code
-            </label>
-            <input
-              type="text"
-              id="companyZipCode"
-              name="companyZipCode"
-              value={companyData.companyZipCode}
-              onChange={handleChange}
-              className="w-full px-3 py-2 mt-1 border rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-            />
-          </div>
-          <div>
-            <label htmlFor="companyPhone" className="block text-sm font-medium text-gray-700">
-              Company Phone
-            </label>
-            <input
-              type="text"
-              id="companyPhone"
-              name="companyPhone"
-              value={companyData.companyPhone}
-              onChange={handleChange}
-              className="w-full px-3 py-2 mt-1 border rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-            />
-          </div>
-          <div>
-            <label htmlFor="companyPIC" className="block text-sm font-medium text-gray-700">
-              Company PIC
-            </label>
-            <input
-              type="text"
-              id="companyPIC"
-              name="companyPIC"
-              value={companyData.companyPIC}
-              onChange={handleChange}
-              className="w-full px-3 py-2 mt-1 border rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-            />
-          </div>
-          <div>
-            <label htmlFor="companyPICTitle" className="block text-sm font-medium text-gray-700">
-              Company PIC Title
-            </label>
-            <input
-              type="text"
-              id="companyPICTitle"
-              name="companyPICTitle"
-              value={companyData.companyPICTitle}
-              onChange={handleChange}
-              className="w-full px-3 py-2 mt-1 border rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-            />
-          </div>
-          <div>
-            <label htmlFor="invoiceNotes" className="block text-sm font-medium text-gray-700">
-              Invoice Notes
-            </label>
-            <textarea
-              id="invoiceNotes"
-              name="invoiceNotes"
-              value={companyData.invoiceNotes}
-              onChange={handleChange}
-              className="w-full px-3 py-2 mt-1 border rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-            />
-          </div>
-          {message && <p className="text-green-500">{message}</p>}
-          <button
-            type="submit"
-            className="w-full px-4 py-2 font-medium text-white bg-indigo-600 rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-          >
-            {isEditing ? "Update" : "Save"}
-          </button>
-        </form>
       </div>
+      <ToastContainer position="top-right" autoClose={3000} hideProgressBar={false} />
     </div>
   );
 };
