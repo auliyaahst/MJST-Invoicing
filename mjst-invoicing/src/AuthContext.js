@@ -1,4 +1,5 @@
 import React, { createContext, useState, useEffect } from "react";
+import { toast } from "react-toastify";
 
 const AuthContext = createContext();
 
@@ -10,13 +11,26 @@ export const AuthProvider = ({ children }) => {
 
   useEffect(() => {
     const token = localStorage.getItem("token");
-    if (token) {
-      setIsAuthenticated(true);
+    const tokenExpiry = localStorage.getItem("tokenExpiry");
+
+    if (token && tokenExpiry) {
+      const timeLeft = new Date(tokenExpiry) - new Date();
+      if (timeLeft > 0) {
+        setIsAuthenticated(true);
+        const timeout = setTimeout(() => {
+          handleSessionExpiry();
+        }, timeLeft);
+        return () => clearTimeout(timeout);
+      } else {
+        handleSessionExpiry();
+      }
     }
   }, []);
 
-  const login = (token, username, fullname, department) => {
+  const login = (token, username, fullname, department, expiryTimeInMinutes = 60) => {
+    const tokenExpiry = new Date(new Date().getTime() + expiryTimeInMinutes * 60000);
     localStorage.setItem("token", token);
+    localStorage.setItem("tokenExpiry", tokenExpiry);
     localStorage.setItem("username", username);
     localStorage.setItem("fullname", fullname);
     localStorage.setItem("department", department);
@@ -25,11 +39,25 @@ export const AuthProvider = ({ children }) => {
     setFullname(fullname);
     setDepartment(department);
 
-    };
+    const timeout = setTimeout(() => {
+      handleSessionExpiry();
+    }, expiryTimeInMinutes * 60000);
+    return () => clearTimeout(timeout);
+  };
 
   const logout = () => {
     localStorage.removeItem("token");
+    localStorage.removeItem("tokenExpiry");
+    localStorage.removeItem("username");
+    localStorage.removeItem("fullname");
+    localStorage.removeItem("department");
     setIsAuthenticated(false);
+    window.location.href = "/";
+  };
+
+  const handleSessionExpiry = () => {
+    toast.error("Session expired. Please log in again.");
+    logout();
   };
 
   return (

@@ -1,12 +1,14 @@
 // App.js
 import React, { useContext } from "react";
 import { BrowserRouter as Router, Route, Routes, useLocation } from "react-router-dom";
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 import Login from "./Login";
 import Register from "./Register";
 import Dashboard from "./Dashboard";
 import Navbar from "./Navbar";
 import Sidebar from "./Sidebar";
-import AuthContext from "./AuthContext";
+import AuthContext, { AuthProvider } from "./AuthContext";
 import InputInvoice from "./InputInvoice";
 import InvoiceList from "./InvoiceList";
 import InputClient from "./InputClient";
@@ -23,11 +25,12 @@ const App = () => {
   const showBar = isAuthenticated && location.pathname !== "/" && location.pathname !== "/register";
 
   return (
-    <>
+    <AuthProvider>
+      <ToastContainer position="top-right" autoClose={3000} hideProgressBar={false} />
       {showBar && <Navbar />}
-      <div className="flex">
+      <div className="flex h-screen">
         {showBar && <Sidebar />}
-        <div className="flex-grow">
+        <div className="flex-grow h-screen">
           <Routes>
             <Route path="/" element={<Login />} />
             <Route path="/register" element={<Register />} />
@@ -42,7 +45,7 @@ const App = () => {
           </Routes>
         </div>
       </div>
-    </>
+    </AuthProvider>
   );
 };
 

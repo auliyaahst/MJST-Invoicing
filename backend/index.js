@@ -71,9 +71,16 @@ app.post("/login", async (req, res) => {
       { expiresIn: "1h" }
     );
 
-    res.json({ token, username: user.rows[0].username });
-    console.log("User logged in:", user.rows[0].username); // Debugging line
-    console.log("Token generated:", token); // Debugging line
+    res.json({
+      token,
+      username: user.rows[0].username,
+      fullname: user.rows[0].userfullname,
+      department: user.rows[0].userdepartment
+    });
+    console.log("User logged in:", user.rows[0].username); 
+    console.log("User Fullname:", user.rows[0].userfullname);
+    console.log("User Department:", user.rows[0].userdepartment);
+    console.log("Token generated:", token); 
   } catch (err) {
     console.error("Error during login:", err.message);
     res.status(500).send("Server error");

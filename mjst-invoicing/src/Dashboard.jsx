@@ -82,7 +82,7 @@ const Dashboard = () => {
   return (
     <div className="flex-grow p-4">
       <h1 className="text-2xl font-bold mb-4">Dashboard</h1>
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         <div className="bg-white p-4 rounded-lg shadow-md">
           <h2 className="text-lg font-bold mb-2">Invoices</h2>
           <p className="text-2xl font-bold">{invoiceCount}</p>
@@ -96,11 +96,12 @@ const Dashboard = () => {
         <div className="bg-white p-4 rounded-lg shadow-md">
           <h2 className="text-lg font-bold mb-2">Total Revenue</h2>
           <p className="text-2xl font-bold">{formatCurrency(totalRevenue)}</p>
-          {/* <a href="/revenue-details" className="text-blue-600 hover:underline">View Revenue Details</a> */}
         </div>
       </div>
-      <div className="bg-white p-4 rounded-lg shadow-md mt-4" style={{ maxWidth: '600px', marginLeft: 0 }}>
-        <Bar data={data} options={options} />
+      <div className="bg-white p-4 rounded-lg shadow-md mt-4 w-full max-w-full lg:max-w-lg">
+        <div className="relative h-32 sm:h-40 md:h-48 lg:h-56">
+          <Bar data={data} options={options} />
+        </div>
       </div>
     </div>
   );

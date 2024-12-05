@@ -15,10 +15,17 @@ const Login = () => {
         username,
         password
       });
+
+      const { token, username: user, fullname, department } = response.data;
+      // Set token expiry to 60 minutes
+      const expiryTimeInMinutes = 60;
+      login(token, user, fullname, department, expiryTimeInMinutes);
       console.log("Token:", response.data.token);
       console.log("Username:", response.data.username);
       localStorage.setItem("token", response.data.token); // Save the token in local storage
       localStorage.setItem("username", response.data.username);
+      localStorage.setItem("fullname", response.data.fullname);
+      localStorage.setItem("department", response.data.department);
       window.location.href = "/dashboard"; // Redirect to the dashboard
     } catch (error) {
       setError("Invalid username or password");
