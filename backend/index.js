@@ -87,13 +87,58 @@ app.post("/login", async (req, res) => {
   }
 });
 
+// Route to fetch all users
+app.get("/users", authenticateToken, async (req, res) => {
+  try {
+    const users = await pool.query("SELECT * FROM users");
+    res.json(users.rows);
+  } catch (err) {
+    console.error("Error fetching users:", err.message);
+    res.status(500).send("Server error");
+  }
+});
+
+// Route to update a user
+app.put("/users/:id", authenticateToken, async (req, res) => {
+  const { id } = req.params;
+  const { fullname, username, department, email } = req.body;
+
+  try {
+    const result = await pool.query("SELECT * FROM users WHERE UserID = $1", [id]);
+    if (result.rows.length === 0) {
+      return res.status(404).send("User not found");
+    }
+
+    await pool.query(
+      "UPDATE users SET UserFullName = $1, UserName = $2, UserDepartment = $3, UserEmail = $4 WHERE UserID = $5",
+      [fullname, username, department, email, id]
+    );
+    res.status(200).send("User updated");
+  } catch (err) {
+    console.error("Error updating user:", err.message);
+    res.status(500).send("Server error");
+  }
+});
+
+
+// Route to delete a user
+app.delete("/users/:id", authenticateToken, async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    await pool.query("DELETE FROM users WHERE UserID = $1", [id]);
+    res.status(200).send("User deleted");
+  } catch (err) {
+    console.error("Error deleting user:", err.message);
+    res.status(500).send("Server error");
+  }
+});
+
 // Route to create a new client
 app.post("/clients", authenticateToken, async (req, res) => {
   const {
     clientName,
     clientAddress,
-    clientProvince,
-    clientZipCode,
     clientPhone,
     clientPIC,
     clientPICTitle,
@@ -105,12 +150,10 @@ app.post("/clients", authenticateToken, async (req, res) => {
 
   try {
     await pool.query(
-      "INSERT INTO clients (ClientName, ClientAddress, ClientProvince, ClientZipCode, ClientPhone, ClientPIC, ClientPICTitle, BusinessSector, CreatedUser, ModifiedUser) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)",
+      "INSERT INTO clients (ClientName, ClientAddress, ClientPhone, ClientPIC, ClientPICTitle, BusinessSector, CreatedUser, ModifiedUser) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)",
       [
         clientName,
         clientAddress,
-        clientProvince,
-        clientZipCode,
         clientPhone,
         clientPIC,
         clientPICTitle,
@@ -268,6 +311,52 @@ app.get("/client-names", authenticateToken, async (req, res) => {
   }
 });
 
+// Route to update a client
+app.put("/clients/:id", authenticateToken, async (req, res) => {
+  const { id } = req.params;
+  const {
+    clientName,
+    clientAddress,
+    clientPhone,
+    clientPIC,
+    clientPICTitle,
+    businessSector
+  } = req.body;
+
+  try {
+    const result = await pool.query(
+      "SELECT * FROM clients WHERE ClientID = $1",
+      [id]
+    );
+    if (result.rows.length === 0) {
+      return res.status(404).send("Client not found");
+    }
+
+    await pool.query(
+      "UPDATE clients SET ClientName = $1, ClientAddress = $2, ClientPhone = $3, ClientPIC = $4, ClientPICTitle = $5, BusinessSector = $6 WHERE ClientID = $7",
+      [clientName, clientAddress, clientPhone, clientPIC, clientPICTitle, businessSector, id]
+    );
+    res.status(200).send("Client updated");
+  } catch (err) {
+    console.error("Error updating client:", err.message);
+    res.status(500).send("Server error");
+  }
+});
+
+
+// Route to delete a client
+app.delete("/clients/:id", authenticateToken, async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    await pool.query("DELETE FROM clients WHERE ClientID = $1", [id]);
+    res.status(200).send("Client deleted");
+  } catch (err) {
+    console.error("Error deleting client:", err.message);
+    res.status(500).send("Server error");
+  }
+});
+
 // Route to fetch all orders
 app.get("/orderlist", authenticateToken, async (req, res) => {
   try {
@@ -390,6 +479,19 @@ app.get("/invoices/:id", authenticateToken, async (req, res) => {
     res.json(invoice.rows[0]);
   } catch (err) {
     console.error("Error fetching invoice details:", err.message);
+    res.status(500).send("Server error");
+  }
+});
+
+// Route to delete an invoice
+app.delete("/invoices/:id", authenticateToken, async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    await pool.query("DELETE FROM invoices WHERE invoiceid = $1", [id]);
+    res.status(200).send("Invoice deleted");
+  } catch (err) {
+    console.error("Error deleting invoice:", err.message);
     res.status(500).send("Server error");
   }
 });

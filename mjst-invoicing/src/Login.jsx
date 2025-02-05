@@ -1,6 +1,7 @@
 import React, { useState, useContext } from "react";
 import axios from "axios";
 import AuthContext from "./AuthContext";
+import Logo from "./assets/mjst png.png";
 
 const Login = () => {
   const [username, setUsername] = useState("");
@@ -34,8 +35,8 @@ const Login = () => {
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-gray-100">
-      <div className="w-full max-w-md p-8 space-y-6 bg-white rounded shadow-md">
-        <h1 className="text-2xl font-bold text-center">Login</h1>
+      <div className="w-full max-w-md p-8 space-y-6 bg-white rounded-lg shadow-md">
+        <h1 className="text-2xl font-bold text-center">Log in</h1>
         <form onSubmit={handleSubmit} className="space-y-6">
           <div>
             <label
@@ -73,19 +74,10 @@ const Login = () => {
             </p>}
           <button
             type="submit"
-            className="w-full px-4 py-2 font-medium text-white bg-indigo-600 rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                className="inline-flex justify-center w-full px-4 py-2 font-medium border border-transparent shadow-sm text-sm rounded-md text-white bg-blue-ribbon hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
           >
-            Login
+            Sign in
           </button>
-          <p className="text-sm font-light text-gray-500 dark:text-gray-400">
-            Don’t have an account yet?{" "}
-            <a
-              href="/register"
-              className="font-medium text-primary-600 hover:underline dark:text-primary-500"
-            >
-              Sign up
-            </a>
-          </p>
         </form>
       </div>
     </div>

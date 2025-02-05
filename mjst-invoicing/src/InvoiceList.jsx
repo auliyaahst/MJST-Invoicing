@@ -9,6 +9,10 @@ import Logo from "./assets/mjst png.png";
 const InvoiceList = () => {
   const [invoices, setInvoices] = useState([]);
   const [selectedInvoice, setSelectedInvoice] = useState(null);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
+  const [selectedInvoiceId, setSelectedInvoiceId] = useState(null);
 
   useEffect(() => {
     const fetchInvoices = async () => {
@@ -43,9 +47,41 @@ const InvoiceList = () => {
       );
       console.log("Fetched invoice details:", response.data);
       setSelectedInvoice(response.data);
+      setIsDetailsModalOpen(true);
     } catch (error) {
       console.error("Error fetching invoice details:", error);
       toast.error("Failed to fetch invoice details.");
+    }
+  };
+
+  const openDeleteModal = (invoiceId) => {
+    setSelectedInvoiceId(invoiceId);
+    setIsDeleteModalOpen(true);
+  };
+
+  const closeDeleteModal = () => {
+    setIsDeleteModalOpen(false);
+    setSelectedInvoiceId(null);
+  };
+
+  const closeDetailsModal = () => {
+    setIsDetailsModalOpen(false);
+    setSelectedInvoice(null);
+  };
+
+  const deleteInvoice = async () => {
+    try {
+      const token = localStorage.getItem("token");
+      await axios.delete(`http://localhost:5000/invoices/${selectedInvoiceId}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      setInvoices(invoices.filter(invoice => invoice.invoiceid !== selectedInvoiceId));
+      toast.success("Invoice deleted successfully");
+    } catch (err) {
+      console.error("Error deleting invoice:", err.message);
+      toast.error("Failed to delete invoice");
+    } finally {
+      closeDeleteModal();
     }
   };
 
@@ -62,14 +98,24 @@ const InvoiceList = () => {
     return new Date(dateString).toLocaleDateString("id-ID", options);
   };
 
-  const closeModal = () => {
-    setSelectedInvoice(null);
-  };
+  const filteredInvoices = invoices.filter(invoice =>
+    invoice.clientname.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    formatDate(invoice.invoicedate).toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   return (
     <div className="w-full h-screen p-6 bg-white rounded-lg shadow-md">
       <h2 className="text-2xl font-bold mb-4 text-center">Invoice List</h2>
-      <div className="overflow-x-auto">
+      <div className="flex justify-center mb-4">
+        <input
+          type="text"
+          placeholder="Search invoice..."
+          value={searchTerm}
+          onChange={e => setSearchTerm(e.target.value)}
+          className="p-2 border border-gray-300 rounded-lg w-1/2"
+        />
+      </div>
+      <div className="overflow-x-auto rounded-lg shadow-md">
         <table className="w-full bg-white rounded-lg shadow-md text-center">
           <thead>
             <tr className="bg-gray-100">
@@ -91,8 +137,8 @@ const InvoiceList = () => {
             </tr>
           </thead>
           <tbody>
-            {invoices.length > 0
-              ? invoices.map(invoice => (
+            {filteredInvoices.length > 0
+              ? filteredInvoices.map(invoice => (
                   <tr key={invoice.invoiceid} className="hover:bg-gray-50">
                     <td className="py-2 px-4 border-b border border-gray-200">
                       {invoice.invoiceno}
@@ -109,9 +155,15 @@ const InvoiceList = () => {
                     <td className="py-2 px-4 border-b border border-gray-200">
                       <button
                         onClick={() => handleViewDetails(invoice.invoiceid)}
-                        className="px-2 py-1 bg-blue-600 text-white rounded hover:bg-blue-700 mr-2"
+                        className="w-full px-2 py-1 bg-blue-600 text-white rounded hover:bg-blue-700 mb-2"
                       >
                         View Details
+                      </button>
+                      <button
+                        onClick={() => openDeleteModal(invoice.invoiceid)}
+                        className="w-full px-2 py-1 bg-red-600 text-white rounded hover:bg-red-700"
+                      >
+                        Delete
                       </button>
                     </td>
                   </tr>
@@ -127,16 +179,16 @@ const InvoiceList = () => {
         </table>
       </div>
 
-      {selectedInvoice && (
+      {isDetailsModalOpen && selectedInvoice && (
         <div className="fixed inset-0 flex items-center justify-center z-50 p-4">
           <div
             className="fixed inset-0 bg-black opacity-50"
-            onClick={closeModal}
+            onClick={closeDetailsModal}
           />
-          <div className="bg-white p-6 rounded-lg shadow-lg z-50 w-full max-w-4xl mx-auto max-h-screen overflow-y-auto">
+          <div className="bg-white p-6 rounded-lg shadow-lg z-50 w-full max-w-4xl max-h-full mx-auto overflow-auto">
             {/* Header */}
-            <div className="flex justify-between items-center mb-6">
-              <div>
+            <div className="flex flex-col md:flex-row justify-between items-center mb-6">
+              <div className="mb-4 md:mb-0">
                 <h2 className="text-2xl font-bold text-blue-600">INVOICE</h2>
                 <p className="text-sm text-gray-600">
                   Date: {formatDate(selectedInvoice.invoicedate)}
@@ -274,7 +326,7 @@ const InvoiceList = () => {
                   loading ? "Loading document..." : "Generate PDF"}
               </PDFDownloadLink>
               <button
-                onClick={closeModal}
+                onClick={closeDetailsModal}
                 className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 text-center"
               >
                 Close
@@ -289,6 +341,29 @@ const InvoiceList = () => {
         autoClose={3000}
         hideProgressBar={false}
       />
+
+      {/* Delete Confirmation Modal */}
+      {isDeleteModalOpen && (
+        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
+          <div className="bg-white p-6 rounded-lg shadow-lg">
+            <p className="mb-4">Are you sure you want to delete this invoice?</p>
+            <div className="flex justify-between space-x-4">
+              <button
+                className="px-4 py-2 bg-gray-300 text-gray-800 rounded hover:bg-gray-400"
+                onClick={closeDeleteModal}
+              >
+                Cancel
+              </button>
+              <button
+                className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600"
+                onClick={deleteInvoice}
+              >
+                Yes, Delete
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
